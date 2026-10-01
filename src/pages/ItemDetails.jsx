@@ -57,7 +57,7 @@ function ItemDetails() {
         </div>
       </div>
 
-      {/*Task 5: matches and claim form go here */}
+      {/*Task 5: matches and claim form go here for easier work */}
     </section>
   );
 }
