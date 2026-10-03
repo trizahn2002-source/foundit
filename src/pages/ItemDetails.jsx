@@ -1,10 +1,55 @@
+import { useEffect, useState } from "react";
+import ClaimForm from "../components/ClaimForm";
+import PossibleMatches from "../components/PossibleMatches";
 import { useParams, Link } from "react-router-dom";
-import { items, users } from "../data/mockData";
+import { users } from "../data/mockData";
+import { getItems } from "../utils/api";
 import "./ItemDetails.css";
 
 function ItemDetails() {
   const { id } = useParams();
-  const item = items.find((i) => i.id === Number(id));
+  const [item, setItem] = useState(null);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadedId, setLoadedId] = useState(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let ignore = false;
+    getItems()
+      .then((loadedItems) => {
+        if (!ignore) {
+          setItems(loadedItems);
+          setItem(loadedItems.find((entry) => String(entry.id) === id) || null);
+          setError("");
+          setLoadedId(id);
+        }
+      })
+      .catch((err) => {
+        if (!ignore) {
+          setError(err.message);
+          setLoadedId(id);
+        }
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+    return () => { ignore = true; };
+  }, [id]);
+
+  if (loading || loadedId !== id) {
+    return <p className="item-details-notfound">Loading item...</p>;
+  }
+
+  if (error) {
+    return (
+      <section className="item-details-notfound">
+        <h1>Could not load item</h1>
+        <p>{error}</p>
+        <Link to="/">Back to all items</Link>
+      </section>
+    );
+  }
 
   if (!item) {
     return (
@@ -57,7 +102,13 @@ function ItemDetails() {
         </div>
       </div>
 
-      {/*Task 5: matches and claim form go here */}
+    {item.reportType === "lost" && item.status === "active" && (
+      <PossibleMatches currentItem={item} allItems={items} />
+    )}
+
+    {item.reportType === "found" && item.status === "active" && (
+      <ClaimForm />
+    )}
     </section>
   );
 }

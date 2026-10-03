@@ -1,0 +1,57 @@
+.matches-section {
+  margin-top: 2rem;
+}
+
+.matches-section h2 {
+  margin-bottom: 1rem;
+}
+
+.matches-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.match-card {
+  padding: 1.25rem;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background-color: #fff;
+}
+
+.match-card h3 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+
+.match-details {
+  margin-bottom: 1rem;
+}
+
+.match-details p {
+  margin: 0.35rem 0;
+}
+
+.match-link {
+  display: inline-block;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.match-link:hover {
+  text-decoration: underline;
+}
+
+.match-link {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.65rem 1rem;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.match-link:hover {
+  text-decoration: none;
+  opacity: 0.8;
+}
