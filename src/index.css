@@ -1,11 +1,19 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap");
+
 :root {
-  --color-primary: #1f4e79;
-  --color-lost: #c0392b;
-  --color-found: #1e8449;
-  --color-bg: #f7f8fa;
-  --color-text: #1c1c1c;
-  --color-muted: #6b7280;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --color-primary: #e07a5f;      /* terracotta */
+  --color-primary-dark: #c4613f;
+  --color-accent: #f2cc8f;       /* sunny mustard */
+  --color-lost: #d1495b;         /* soft rose */
+  --color-found: #5fa36a;        /* sage green */
+  --color-bg: #fff8f0;           /* warm cream */
+  --color-surface: #ffffff;
+  --color-text: #3d405b;         /* soft navy */
+  --color-muted: #8a8d9f;
+  --radius: 16px;
+  --shadow: 0 6px 20px rgba(61, 64, 91, 0.08);
+
+  font-family: "Nunito", system-ui, sans-serif;
   color: var(--color-text);
   background: var(--color-bg);
 }
@@ -13,71 +21,4 @@
 * { box-sizing: border-box; }
 body { margin: 0; }
 a { color: inherit; }
-/* ---------- Shared tokens ---------- */
-:root {
-  --color-border: #e5e7eb;
-  --color-white: #ffffff;
-  --radius: 10px;
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --space: 1rem;
-}
-
-/* ---------- Base ---------- */
-h1, h2, h3 { color: var(--color-primary); margin-top: 0; }
-img { max-width: 100%; display: block; }
-button, input, select, textarea { font: inherit; }
-
-/* ---------- Layout ---------- */
-.container {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: calc(var(--space) * 2) var(--space);
-}
-
-/* ---------- Buttons ---------- */
-.btn {
-  background: var(--color-primary);
-  color: var(--color-white);
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: var(--radius);
-  cursor: pointer;
-}
-.btn:hover { opacity: 0.9; }
-.btn-outline {
-  background: transparent;
-  color: var(--color-primary);
-  border: 1px solid var(--color-primary);
-}
-
-/* ---------- Forms ---------- */
-.input {
-  width: 100%;
-  padding: 0.6rem 0.8rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background: var(--color-white);
-}
-.input:focus {
-  outline: none;
-  border-color: var(--color-primary);
-}
-
-/* ---------- Cards ---------- */
-.card {
-  background: var(--color-white);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: var(--space);
-}
-
-/* ---------- Badges ---------- */
-.badge {
-  display: inline-block;
-  padding: 0.2rem 0.7rem;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  color: var(--color-white);
-}
-.badge-lost { background: var(--color-lost); }
-.badge-found { background: var(--color-found); }
+h1, h2, h3 { font-weight: 800; }
