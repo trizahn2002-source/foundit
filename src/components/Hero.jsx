@@ -6,7 +6,7 @@ function Hero() {
     <section className="hero">
       <div className="hero-text">
         <h1>Lost something? Let's bring it home.</h1>
-        <p>Nairobi's friendly lost and found board.</p>
+        <p>Your friendly lost and found board.</p>
         <div className="hero-buttons">
           <Link to="/report" className="btn btn-primary">I lost something</Link>
           <Link to="/report" className="btn btn-outline">I found something</Link>
