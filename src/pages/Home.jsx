@@ -1,3 +1,4 @@
+import Hero from "../components/Hero";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getItems } from "../utils/api";
@@ -26,11 +27,7 @@ function Home() {
 
   return (
     <div className="container">
-      <section className="hero">
-        <h1>Lost something? Found something?</h1>
-        <p>Search reported items or report one so it can find its way back home.</p>
-        <Link to="/report" className="btn">Report an item</Link>
-      </section>
+        <Hero />
 
       <div className="home-controls">
         <input

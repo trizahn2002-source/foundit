@@ -1,29 +1,35 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap");
+
+/* ---------- Theme & shared tokens ---------- */
 :root {
-  --color-primary: #1f4e79;
-  --color-lost: #c0392b;
-  --color-found: #1e8449;
-  --color-bg: #f7f8fa;
-  --color-text: #1c1c1c;
-  --color-muted: #6b7280;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* Warm & friendly theme */
+  --color-primary: #e07a5f;
+  --color-primary-dark: #c4613f;
+  --color-accent: #f2cc8f;
+  --color-lost: #d1495b;
+  --color-found: #5fa36a;
+  --color-bg: #fff8f0;
+  --color-surface: #ffffff;
+  --color-text: #3d405b;
+  --color-muted: #8a8d9f;
+  --radius: 16px;
+  --shadow: 0 6px 20px rgba(61, 64, 91, 0.08);
+
+  /* Shared tokens */
+  --color-border: #e5e7eb;
+  --color-white: #ffffff;
+  --space: 1rem;
+
+  font-family: "Nunito", system-ui, sans-serif;
   color: var(--color-text);
   background: var(--color-bg);
 }
 
+/* ---------- Base ---------- */
 * { box-sizing: border-box; }
 body { margin: 0; }
 a { color: inherit; }
-/* ---------- Shared tokens ---------- */
-:root {
-  --color-border: #e5e7eb;
-  --color-white: #ffffff;
-  --radius: 10px;
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --space: 1rem;
-}
-
-/* ---------- Base ---------- */
-h1, h2, h3 { color: var(--color-primary); margin-top: 0; }
+h1, h2, h3 { color: var(--color-primary); font-weight: 800; margin-top: 0; }
 img { max-width: 100%; display: block; }
 button, input, select, textarea { font: inherit; }
 
@@ -83,7 +89,6 @@ button, input, select, textarea { font: inherit; }
 .badge-found { background: var(--color-found); }
 
 /* ---------- Authentication ---------- */
-
 .auth-page {
   min-height: 70vh;
   display: flex;
@@ -174,7 +179,6 @@ button, input, select, textarea { font: inherit; }
 }
 
 /* ---------- Dashboard ---------- */
-
 .dashboard-page {
   max-width: 1100px;
   margin: 0 auto;
@@ -320,8 +324,7 @@ button, input, select, textarea { font: inherit; }
   font-size: 0.9rem;
 }
 
-/* ---------- Dashboard Responsive Design ---------- */
-
+/* ---------- Dashboard responsive ---------- */
 @media (max-width: 700px) {
   .dashboard-header {
     flex-direction: column;
