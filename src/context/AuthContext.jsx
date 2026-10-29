@@ -1,30 +1,69 @@
-import { createContext, useContext, useEffect, useState } from "react";
 
-const API = "http://localhost:5555";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  checkSession,
+  logout as apiLogout,
+} from "../utils/api";
+
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [authError, setAuthError] = useState(null);
 
-  useEffect(() => {
-    fetch(`${API}/api/check_session`, { credentials: "include" })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => setUser(data?.user ?? null))
-      .catch(() => setUser(null))
-      .finally(() => setLoading(false));
+  const refreshSession = useCallback(async () => {
+    try {
+      const data = await checkSession();
+
+      setUser(data.logged_in ? data.user : null);
+      setAuthError(null);
+
+      return data;
+    } catch (error) {
+      // A connection failure does not necessarily mean
+      // that the user's session has expired.
+      setAuthError(
+        "Unable to connect to FoundIt. Please try again."
+      );
+
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  async function logout() {
-    await fetch(`${API}/api/logout`, {
-      method: "POST",
-      credentials: "include",
+  useEffect(() => {
+    refreshSession().catch(() => {
+      // Keep the error available through authError.
     });
+  }, [refreshSession]);
+
+  async function logout() {
+    await apiLogout();
+
     setUser(null);
+    setAuthError(null);
   }
 
   return (
-    <AuthContext.Provider value={{ user, setUser, logout, loading }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        setUser,
+        loading,
+        authError,
+        refreshSession,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

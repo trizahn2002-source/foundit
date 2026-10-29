@@ -2,7 +2,7 @@ import Hero from "../components/Hero";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Search, MapPin, CalendarDays, ImageOff } from "lucide-react";
-import { getItems, getCategories } from "../utils/api";
+import { getItemsPage, getCategories } from "../utils/api";
 import "./Home.css";
 
 function isReturnedItem(item) {
@@ -23,6 +23,13 @@ function Home() {
   const [categories, setCategories] = useState([]);
   const [items, setItems] = useState(null);
   const [error, setError] = useState("");
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState(null);
+
+  // Go back to page 1 whenever the search or filters change
+  useEffect(() => {
+    setPage(1);
+  }, [search, filter, categoryId]);
 
   useEffect(() => {
     getCategories()
@@ -34,18 +41,29 @@ function Home() {
     let ignore = false;
 
     const timer = setTimeout(() => {
-      // The Returned filter needs to inspect item status,
-      // so request all report types before filtering locally.
+      // Request all report types when showing returned items.
+      // Keep pagination from the latest main branch.
       const requestedType = filter === "returned" ? "all" : filter;
 
-      getItems({
+      getItemsPage({
         search,
         type: requestedType,
         categoryId,
+        page,
       })
         .then((data) => {
           if (!ignore) {
-            setItems(Array.isArray(data) ? data : []);
+            const pageItems = Array.isArray(data.items) ? data.items : [];
+
+            setItems(
+              filter === "returned"
+                ? pageItems.filter(isReturnedItem)
+                : pageItems
+            );
+
+            setPagination(data.pagination);
+          }
+        })
             setError("");
           }
         })
@@ -61,7 +79,7 @@ function Home() {
       ignore = true;
       clearTimeout(timer);
     };
-  }, [search, filter, categoryId]);
+  }, [search, filter, categoryId, page]);
 
   const allItems = items || [];
 
@@ -212,6 +230,17 @@ function Home() {
               </Link>
             );
           })}
+        </div>
+      )}
+    {pagination && pagination.pages > 1 && (
+        <div style={{ display: "flex", gap: "1rem", justifyContent: "center", alignItems: "center", margin: "2rem 0" }}>
+          <button className="btn" disabled={!pagination.has_prev} onClick={() => setPage(page - 1)}>
+            ← Previous
+          </button>
+          <span>Page {pagination.page} of {pagination.pages}</span>
+          <button className="btn" disabled={!pagination.has_next} onClick={() => setPage(page + 1)}>
+            Next →
+          </button>
         </div>
       )}
     </div>

@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import TipFinder from "../components/TipFinder";
 import {
   ArrowLeft,
   CalendarDays,
@@ -23,10 +24,9 @@ import {
 import { useAuth } from "../context/AuthContext";
 import ClaimForm from "../components/ClaimForm";
 import PossibleMatches from "../components/PossibleMatches";
-import { getItem } from "../utils/api";
+import { getItem, request } from "../utils/api";
 import "./ItemDetails.css";
 
-const API = "http://localhost:5555";
 
 function ItemDetails() {
   const { id } = useParams();
@@ -91,6 +91,7 @@ function ItemDetails() {
   // LOAD CLAIMS
   // -----------------------------------------
 
+
   async function loadClaims() {
     if (!user) {
       setClaims([]);
@@ -98,12 +99,12 @@ function ItemDetails() {
       return;
     }
 
-    const res = await fetch(`${API}/api/items/${id}/claims`, {
-      credentials: "include",
-    });
-
-    if (res.ok) {
-      const data = await res.json();
+    try {
+      const data = await request(
+        `/items/${id}/claims`,
+        {},
+        "Could not load claims."
+      );
 
       setClaims(
         Array.isArray(data)
@@ -112,15 +113,20 @@ function ItemDetails() {
       );
 
       setIsOwner(data.is_owner ?? false);
+    } catch (err) {
+      setClaimError(err.message);
     }
   }
+    // Load claims when the item or signed-in user changes.
+    useEffect(() => {
+      if (!user) {
+        setClaims([]);
+        setIsOwner(false);
+        return;
+      }
 
-  useEffect(() => {
-    if (authLoading) return;
-
-    loadClaims();
-  }, [id, user, authLoading]);
-
+      loadClaims();
+    }, [id, user?.id]);
   // -----------------------------------------
   // APPROVE OR REJECT A CLAIM
   // -----------------------------------------
@@ -143,22 +149,16 @@ function ItemDetails() {
         payload.contact_detail = contactDetail.trim();
       }
 
-      const res = await fetch(`${API}/api/claims/${claimId}`, {
-        method: "PATCH",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
+      
+      const data = await request(
+        `/claims/${claimId}`,
+        {
+          method: "PATCH",
+          body: payload,
         },
-        body: JSON.stringify(payload),
-      });
+        "Could not update claim."
+      );
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(
-          data.error || "Could not update claim"
-        );
-      }
 
       setItem(data.item);
       await loadClaims();
@@ -477,7 +477,11 @@ function ItemDetails() {
             onClaimed={loadClaims}
           />
         )}
-
+        {myClaim && myClaim.status === "approved" && (
+            <div style={{ margin: "1.5rem 0" }}>
+              <TipFinder itemId={item.id} />
+            </div>
+          )}
         {/* CLAIMANT'S STATUS — helpful next steps */}
 
         {myClaim && (() => {

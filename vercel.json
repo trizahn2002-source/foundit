@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "https://foundit-backend-4g5g.onrender.com/api/$1" },
+    { "source": "/(.*)", "destination": "/" }
+  ]
+}

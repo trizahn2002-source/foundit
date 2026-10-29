@@ -5,40 +5,96 @@
 //   Pages:  itemName / reportType / category + categoryId / location {name, lat, lon} / photo / reportedBy
 // Keep the translation here so no page has to know about the backend's names.
 
-const API_URL = import.meta.env?.VITE_API_URL ?? "http://localhost:5555/api";
+const API_BASE = (
+  import.meta.env.VITE_API_URL || "http://localhost:5555"
+).replace(/\/+$/, "");
+
+const API_URL = `${API_BASE}/api`;
 
 const OFFLINE_MSG =
   "Can't reach the server. Open a second terminal and run: python app.py";
 
 // Sends the request with the login cookie and returns the parsed JSON (null for 204).
 // On an error response it throws an Error with the server's message and a .status.
-async function request(path, { body, ...options } = {}, fallbackMessage = "Something went wrong.") {
-  let res;
-  try {
-    res = await fetch(`${API_URL}${path}`, {
-      credentials: "include", // without this the login session cookie is not sent
-      ...options,
-      headers: body === undefined ? {} : { "Content-Type": "application/json" },
-      body: body === undefined ? undefined : JSON.stringify(body),
-    });
-  } catch {
-    throw new Error(OFFLINE_MSG);
+
+async function getCsrfToken() {
+  const response = await fetch(`${API_URL}/csrf-token`, {
+    credentials: "include",
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      "Unable to initialize your security session."
+    );
   }
 
-  if (!res.ok) {
-    let message = fallbackMessage;
-    try {
-      const data = await res.json();
-      if (data.error) message = data.error;
-    } catch {
-      // the response had no JSON body; keep the fallback message
-    }
-    const err = new Error(message);
-    err.status = res.status;
-    throw err;
+  const data = await response.json();
+
+  if (!data.csrf_token) {
+    throw new Error(
+      "The server did not provide a security token."
+    );
   }
-  return res.status === 204 ? null : res.json();
+
+  return data.csrf_token;
 }
+
+// Sends the request with the login cookie and returns the parsed JSON (null for 204).
+// On an error response it throws an Error with the server's message and a .status.
+// State-changing requests also include the CSRF security token.
+  export async function request(
+    path,
+    { body, ...options } = {},
+    fallbackMessage = "Something went wrong."
+  ) {
+    const method = (options.method || "GET").toUpperCase();
+
+    const isWrite = !["GET", "HEAD", "OPTIONS"].includes(method);
+
+    let res;
+
+    try {
+      const headers = new Headers(options.headers || {});
+
+      if (body !== undefined) {
+        headers.set("Content-Type", "application/json");
+      }
+
+      if (isWrite) {
+        const csrfToken = await getCsrfToken();
+        headers.set("X-CSRF-Token", csrfToken);
+      }
+
+      res = await fetch(`${API_URL}${path}`, {
+        ...options,
+        method,
+        credentials: "include",
+        headers,
+        body:
+          body === undefined
+            ? undefined
+            : JSON.stringify(body),
+      });
+    } catch (err) {
+      throw new Error(
+        err.message?.includes("security token") ||
+        err.message?.includes("security session")
+          ? err.message
+          : OFFLINE_MSG
+      );
+    }
+
+    if (!res.ok) {
+      let details = {};
+      try { details = await res.json(); } catch { /* Non-JSON error response */ }
+      const err = new Error(details.error || details.message || fallbackMessage);
+      err.status = res.status;
+      err.details = details;
+      throw err;
+    }
+    return res.status === 204 ? null : res.json();
+  }
 
 // Flask item -> the shape the pages use
 function toFrontendItem(item) {
@@ -107,6 +163,19 @@ export async function getItems({ search, type, categoryId } = {}) {
 
   const items = await request(`/items${query ? `?${query}` : ""}`, {}, "Could not load items.");
   return items.map(toFrontendItem);
+}
+
+// One page of items for the Home page (12 per page by default)
+export async function getItemsPage({ search, type, categoryId, page = 1, perPage = 12 } = {}) {
+  const params = new URLSearchParams();
+  if (search && search.trim()) params.set("q", search.trim());
+  if (type && type !== "all") params.set("type", type);
+  if (categoryId) params.set("category", categoryId);
+  params.set("page", page);
+  params.set("per_page", perPage);
+
+  const data = await request(`/items?${params.toString()}`, {}, "Could not load items.");
+  return { items: data.items.map(toFrontendItem), pagination: data.pagination };
 }
 
 export async function getItem(id) {
@@ -201,14 +270,30 @@ export function logout() {
 }
 
 // Returns { logged_in, user }. Never throws, so pages can call it on load.
-export async function checkSession() {
-  try {
-    return await request(
-      "/check_session",
-      {},
-      "Could not check your session."
-    );
-  } catch {
-    return { logged_in: false, user: null };
-  }
+// Returns { logged_in, user }.
+// A failed request is not the same as a logged-out session.
+export function checkSession() {
+  return request(
+    "/check_session",
+    {},
+    "Could not check your session."
+  );
+}
+
+// ---------- M-Pesa tipping ----------
+
+export function sendTip(itemId, amount, phone) {
+  return request(
+    `/items/${itemId}/tips`,
+    { method: "POST", body: { amount, phone } },
+    "Could not send the tip."
+  );
+}
+
+export function getTipStatus(tipId) {
+  return request(
+    `/tips/${tipId}/status`,
+    {},
+    "Could not check the tip."
+  );
 }

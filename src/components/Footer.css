@@ -1,0 +1,47 @@
+.footer {
+  margin-top: 2rem;
+  padding: 2rem 1rem 1.75rem;
+  text-align: center;
+  border-top: 1px solid rgba(229, 103, 90, 0.18);
+  color: #777;
+}
+
+.footer-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin: 0 auto 0.8rem;
+  text-decoration: none;
+}
+
+.footer-tagline {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+}
+
+.footer-small {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #999;
+}
+
+/* Slightly smaller footer logo */
+.footer .footer-logo {
+  font-size: 1.15rem;
+  gap: 0;
+}
+
+/* Scale the magnifying glass */
+.footer .logo-search {
+  width: 20px;
+  height: 23px;
+}
+
+/* Match the navbar's golden sparkle */
+.footer .logo-sparkle {
+  width: 15px;
+  height: 15px;
+  color: #f5b544;
+  margin-left: 4px;
+}

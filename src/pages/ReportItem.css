@@ -465,3 +465,33 @@
     padding: 1.5rem;
   }
 }
+
+.view-reports-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 12px 22px;
+  border: 1.5px solid #e77960;
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.6);
+  color: #d96951;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.view-reports-btn:hover {
+  background: #fff0e9;
+  color: #c95943;
+  transform: translateY(-2px);
+}
+
+.view-reports-btn:focus-visible {
+  outline: 3px solid #f5b544;
+  outline-offset: 3px;
+}

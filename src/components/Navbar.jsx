@@ -11,8 +11,8 @@ function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
-  const username = user?.username || "";
-  const initial = username.charAt(0).toUpperCase() || "?";
+  const displayName = user?.display_name?.trim() || user?.username || "";
+  const initial = displayName.charAt(0).toUpperCase() || "?";
 
   useEffect(() => {
     function handleOutsideClick(event) {
@@ -97,7 +97,7 @@ function Navbar() {
             <button
               type="button"
               className="nav-avatar-button"
-              aria-label={`Open account menu for ${username}`}
+              aria-label={`Open account menu for ${displayName}`}
               aria-expanded={menuOpen}
               aria-haspopup="true"
               onClick={() => setMenuOpen((prev) => !prev)}
@@ -116,7 +116,7 @@ function Navbar() {
                   <span className="nav-menu-avatar">{initial}</span>
 
                   <div className="nav-account-info">
-                    <strong>{username}</strong>
+                    <strong>{displayName}</strong>
                     <span>Signed in</span>
                   </div>
                 </div>

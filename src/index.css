@@ -1659,3 +1659,135 @@ button, input, select, textarea { font: inherit; }
     transition: none;
   }
 }
+
+
+/* ---------- FoundIt Password Requirements ---------- */
+
+.password-checklist {
+  margin: 4px 0 18px;
+  padding: 17px 18px;
+  border: 1px solid #f2ddd2;
+  border-radius: 14px;
+  background: #fffaf6;
+  font-family: inherit;
+}
+
+.password-checklist-title {
+  margin: 0 0 13px;
+  color: #343c54;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.password-checklist-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.password-rule {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #777783;
+  font-size: 0.83rem;
+  line-height: 1.45;
+  transition: color 0.2s ease;
+}
+
+.password-rule svg {
+  flex-shrink: 0;
+  color: #b9b0ab;
+}
+
+.password-rule.is-valid {
+  color: #28764f;
+}
+
+.password-rule.is-valid svg {
+  color: #28764f;
+}
+
+.password-progress {
+  margin-top: 17px;
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #f0e3dc;
+}
+
+.password-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: #408c68;
+  transition: width 0.25s ease;
+}
+
+.password-progress-label {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  color: #777783;
+}
+
+@media (max-width: 480px) {
+  .password-checklist {
+    padding: 14px;
+  }
+}
+
+/* ---------- Forgot Password Link ---------- */
+
+.auth-forgot-password {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -4px;
+  margin-bottom: 12px;
+}
+
+.auth-forgot-password .switch-button {
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+/* FoundIt account settings */
+.foundit-settings { display: grid; gap: 1.15rem; max-width: 100%; }
+.foundit-settings-intro { display: flex; align-items: center; gap: 1rem; padding: 1.25rem 1.4rem; background: linear-gradient(115deg, #ffe9db, #fff5ec); border: 1px solid #f3dacd; border-radius: 20px; }
+.foundit-settings-avatar { width: 60px; height: 60px; flex-shrink: 0; display: grid; place-items: center; border-radius: 18px; background: #e07a5f; color: #fff; font-size: 1.65rem; font-weight: 800; }
+.foundit-settings-identity { min-width: 0; }
+.foundit-settings-identity h3 { margin: 0 0 .2rem; color: #3d405b; font-size: 1.2rem; overflow-wrap: anywhere; }
+.foundit-settings-identity p { margin: 0; color: #797d8d; overflow-wrap: anywhere; }
+.foundit-settings-sections { display: grid; gap: .85rem; }
+.foundit-settings-section { overflow: hidden; background: #fff; border: 1px solid #f0e3dc; border-radius: 17px; box-shadow: 0 4px 14px rgba(61,64,91,.035); transition: border-color .2s, box-shadow .2s; }
+.foundit-settings-section.is-expanded { border-color: #eebda8; box-shadow: 0 7px 22px rgba(61,64,91,.055); }
+.foundit-settings-trigger { display: flex; align-items: center; width: 100%; padding: 1.15rem 1.3rem; gap: 1rem; text-align: left; border: 0; background: transparent; cursor: pointer; color: #3d405b; }
+.foundit-settings-trigger:disabled { cursor: wait; }
+.foundit-settings-trigger:focus-visible { outline: 3px solid #e07a5f; outline-offset: -3px; }
+.foundit-settings-icon { display: grid; place-items: center; width: 46px; height: 46px; flex-shrink: 0; color: #cf6b50; border-radius: 14px; background: #fff0e8; }
+.foundit-settings-trigger-text { flex: 1; min-width: 0; display: grid; gap: .18rem; }
+.foundit-settings-trigger-text strong { font-size: 1rem; font-weight: 800; }
+.foundit-settings-trigger-text small { color: #7e8090; font-size: .85rem; line-height: 1.5; }
+.foundit-settings-chevron { color: #8a8d9f; flex-shrink: 0; transition: transform .2s; }
+.is-expanded .foundit-settings-chevron { transform: rotate(180deg); }
+.foundit-settings-body { border-top: 1px solid #f2e8e2; padding: 1.35rem 1.4rem 1.5rem; }
+.foundit-settings-body form { display: flex; flex-direction: column; gap: .6rem; max-width: 540px; }
+.foundit-settings-body label { color: #3d405b; font-weight: 750; margin-top: .3rem; }
+.foundit-settings-body .input { width: 100%; padding: .78rem .9rem; border-radius: 11px; }
+.foundit-settings-body .input:focus-visible { outline: 2px solid #e07a5f; outline-offset: 1px; }
+.foundit-settings-help { color: #73778b; line-height: 1.55; margin: 0 0 .6rem; }
+.foundit-settings-save { align-self: flex-start; border-radius: 12px; padding: .7rem 1.25rem; margin-top: .55rem; }
+.foundit-settings-provider { display: flex; gap: .8rem; align-items: flex-start; padding: 1rem; border-radius: 13px; background: #fff7ef; color: #3d405b; }
+.foundit-settings-provider svg { color: #c4613f; flex-shrink: 0; }
+.foundit-settings-provider p { color: #73778b; margin: .25rem 0 0; line-height: 1.5; }
+.foundit-settings-section.is-danger .foundit-settings-icon { background: #fff0f0; color: #a93838; }
+.foundit-settings-section.is-danger .foundit-settings-trigger-text strong { color: #a93838; }
+.foundit-settings-danger-notice { padding: 1rem; margin: 0 0 .55rem; background: #fff6f5; color: #8b3333; border: 1px solid #f2d5d2; border-radius: 12px; line-height: 1.6; }
+.foundit-settings-google-button { min-height: 44px; margin: .2rem 0 .8rem; }
+.foundit-settings-delete-button { align-self: flex-start; margin-top: .6rem; padding: .75rem 1.2rem; background: #aa3636; color: white; border: 0; border-radius: 12px; font: inherit; font-weight: 800; cursor: pointer; }
+.foundit-settings-delete-button:hover:not(:disabled) { background: #8b2525; }
+.foundit-settings-delete-button:disabled { opacity: .48; cursor: not-allowed; }
+.foundit-settings-message { margin: 1rem 0 0; color: #3d405b; font-weight: 700; }
+@media(max-width:600px) { .foundit-settings-intro { padding: 1rem; } .foundit-settings-trigger { padding: 1rem; gap: .75rem; } .foundit-settings-body { padding: 1rem; } .foundit-settings-icon { width: 40px; height: 40px; } }
+@media(prefers-reduced-motion:reduce) { .foundit-settings-section, .foundit-settings-chevron { transition: none; } }

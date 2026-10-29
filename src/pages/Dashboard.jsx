@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import AccountSettings from "../components/AccountSettings";
 import { BellRing, ClipboardCheck, Package, MapPin, CalendarDays, PackageOpen, ArrowUpRight, PlusCircle } from "lucide-react";
 import {
   checkSession,
@@ -8,6 +9,7 @@ import {
   getItem,
   updateItem,
   deleteItem,
+  request,
 } from "../utils/api";
 
 const STATUS_LABELS = {
@@ -74,17 +76,20 @@ function Dashboard() {
       // One server-side query for claims requiring review or handover.
       // Does not fetch claims for each individual item.
       try {
-        const response = await fetch(
-          "http://localhost:5555/api/claims/action-required",
-          { credentials: "include" }
+        const payload = await request(
+          "/claims/action-required",
+          {},
+          "Could not load required actions"
         );
-        const payload = await response.json();
-        if (!response.ok) throw new Error(payload.error || "Could not load required actions");
-        if (!ignore) setActionClaims(payload.claims || []);
-      } catch (err) {
-        if (!ignore) setPendingError(err.message);
-      }
 
+        if (!ignore) {
+          setActionClaims(payload.claims || []);
+        }
+      } catch (err) {
+        if (!ignore) {
+          setPendingError(err.message);
+        }
+      }
       const claimList = claimsData.claims || [];
 
       const uniqueItemIds = [
@@ -217,7 +222,7 @@ function Dashboard() {
           <h1>
             Welcome back,{" "}
             <span className="dashboard-username">
-              {user.username}!
+              {user.display_name || user.username}!
             </span>
           </h1>
 
@@ -600,51 +605,7 @@ function Dashboard() {
         </div>
 
 
-      <div className="account-card dashboard-account-card">
-        {/* Name */}
-        <div className="dashboard-account-detail">
-          <span className="dashboard-account-icon" aria-hidden="true">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="8" r="4" />
-              <path d="M4 21v-2a8 8 0 0 1 16 0v2" />
-            </svg>
-          </span>
-
-          <div className="dashboard-account-text">
-            <span className="account-label">Name</span>
-            <strong>{user?.username || "Unknown user"}</strong>
-          </div>
-        </div>
-
-        {/* Email */}
-        <div className="dashboard-account-detail">
-          <span className="dashboard-account-icon" aria-hidden="true">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <rect x="3" y="5" width="18" height="14" rx="2" />
-              <path d="m3 7 9 6 9-6" />
-            </svg>
-          </span>
-
-          <div className="dashboard-account-text">
-            <span className="account-label">Email</span>
-            <strong>{user?.email || "No email available"}</strong>
-          </div>
-        </div>
-      </div>
+      <AccountSettings user={user} onUserChanged={setUser} />
       </div>}
     </section>
   );

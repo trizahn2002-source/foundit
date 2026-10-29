@@ -1,8 +1,8 @@
 import { ArrowRight, CheckCircle2, Info, ShieldCheck, X } from "lucide-react";
 import { useState } from "react";
 import "./ClaimForm.css";
+import { request } from "../utils/api";
 
-const API = "http://localhost:5555";
 
 function ClaimForm({ itemId, onClaimed }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,17 +21,15 @@ function ClaimForm({ itemId, onClaimed }) {
 
     setSubmitting(true);
     try {
-      const res = await fetch(`${API}/api/items/${itemId}/claims`, {
+      
+    const data = await request(
+      `/items/${itemId}/claims`,
+      {
         method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "We couldn't submit your claim. Please try again.");
-      }
+        body: { message },
+      },
+      "We couldn't submit your claim. Please try again."
+    );
 
       setMessage("");
       setIsOpen(false);
