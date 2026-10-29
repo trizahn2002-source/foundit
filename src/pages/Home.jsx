@@ -2,7 +2,7 @@ import Hero from "../components/Hero";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Search, MapPin, CalendarDays, ImageOff } from "lucide-react";
-import { getItems, getCategories } from "../utils/api";
+import { getItemsPage, getCategories } from "../utils/api";
 import "./Home.css";
 
 function Home() {
@@ -12,6 +12,13 @@ function Home() {
   const [categories, setCategories] = useState([]);
   const [items, setItems] = useState(null);
   const [error, setError] = useState("");
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState(null);
+
+  // Go back to page 1 whenever the search or filters change
+  useEffect(() => {
+    setPage(1);
+  }, [search, filter, categoryId]);
 
   useEffect(() => {
     getCategories().then(setCategories).catch(() => {});
@@ -20,10 +27,11 @@ function Home() {
   useEffect(() => {
     let ignore = false;
     const timer = setTimeout(() => {
-      getItems({ search, type: filter, categoryId })
+      getItemsPage({ search, type: filter, categoryId, page })
         .then((data) => {
           if (!ignore) {
-            setItems(data);
+            setItems(data.items);
+            setPagination(data.pagination);
             setError("");
           }
         })
@@ -35,7 +43,7 @@ function Home() {
       ignore = true;
       clearTimeout(timer);
     };
-  }, [search, filter, categoryId]);
+  }, [search, filter, categoryId, page]);
 
   const shownItems = items || [];
 
@@ -125,6 +133,17 @@ function Home() {
               </div>
             </Link>
           ))}
+        </div>
+      )}
+    {pagination && pagination.pages > 1 && (
+        <div style={{ display: "flex", gap: "1rem", justifyContent: "center", alignItems: "center", margin: "2rem 0" }}>
+          <button className="btn" disabled={!pagination.has_prev} onClick={() => setPage(page - 1)}>
+            ← Previous
+          </button>
+          <span>Page {pagination.page} of {pagination.pages}</span>
+          <button className="btn" disabled={!pagination.has_next} onClick={() => setPage(page + 1)}>
+            Next →
+          </button>
         </div>
       )}
     </div>
