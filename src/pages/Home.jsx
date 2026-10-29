@@ -62,8 +62,6 @@ function Home() {
             );
 
             setPagination(data.pagination);
-          }
-        })
             setError("");
           }
         })

@@ -1,10 +1,13 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { request } from "../utils/api";
+import { getSafeRedirect } from "../utils/redirect";
 
 function LoginOTP() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const destination = getSafeRedirect(location.state?.from);
   const { setUser } = useAuth();
   const [code, setCode] = useState("");
   const [message, setMessage] = useState("");
@@ -22,7 +25,7 @@ function LoginOTP() {
     try {
       const data = await request("/login/verify-otp", { method: "POST", body: { code } });
       setUser(data.user);
-      navigate("/dashboard", { replace: true });
+      navigate(destination || "/dashboard", { replace: true });
     } catch (error) {
       setMessage(error.message);
     } finally { setWorking(false); }

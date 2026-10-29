@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation, useNavigate} from "react-router-dom";
 import TipFinder from "../components/TipFinder";
 import {
   ArrowLeft,
@@ -30,6 +30,8 @@ import "./ItemDetails.css";
 
 function ItemDetails() {
   const { id } = useParams();
+  const routerLocation = useLocation();
+  const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
 
   const [item, setItem] = useState(null);
@@ -127,6 +129,15 @@ function ItemDetails() {
 
       loadClaims();
     }, [id, user?.id]);
+
+      // Scroll to the claims section when the URL ends in #claims.
+  useEffect(() => {
+    if (routerLocation.hash !== "#claims") return;
+    if (loading || authLoading || loadedId !== id) return;
+    document
+      .getElementById("claims")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [routerLocation.hash, loading, authLoading, loadedId, id]);
   // -----------------------------------------
   // APPROVE OR REJECT A CLAIM
   // -----------------------------------------
@@ -292,10 +303,7 @@ function ItemDetails() {
     !myClaim;
 
   const reporterLabel =
-    item.reporterUsername ??
-    item.reporter_username ??
-    `User #${item.reportedBy ?? item.user_id}`;
-
+    (item.reporterUsername ?? item.reporter_username)?.trim() || "Unknown user";
   const statusLabel =
     item.status === "active"
       ? "Active report"
@@ -463,12 +471,27 @@ function ItemDetails() {
         {/* LOGIN PROMPT */}
 
         {!user && reportType === "found" && (
-          <p className="item-details-login-note">
-            <Link to="/login">Log in</Link>{" "}
-            to claim this item.
-          </p>
+          <div className="item-details-login-note">
+            <button
+              type="button"
+              className="btn"
+              onClick={() =>
+                navigate("/login", {
+                  state: {
+                    from: {
+                      pathname: routerLocation.pathname,
+                      search: routerLocation.search,
+                      hash: "#claims",
+                    },
+                    message: "Please log in to claim this item.",
+                  },
+                })
+              }
+            >
+              Please log in to claim this item
+            </button>
+          </div>
         )}
-
         {/* CLAIM FORM */}
 
         {canClaim && (

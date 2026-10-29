@@ -1,7 +1,7 @@
-
 import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import RequireAuth from "./components/RequireAuth";
 import Home from "./pages/Home";
 import ReportItem from "./pages/ReportItem";
 import ItemDetails from "./pages/ItemDetails";
@@ -21,7 +21,14 @@ function App() {
       <main className="container">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/report" element={<ReportItem />} />
+          <Route
+            path="/report"
+            element={
+              <RequireAuth message="Please log in to report your item.">
+                <ReportItem />
+              </RequireAuth>
+            }
+          />
           <Route path="/items/:id" element={<ItemDetails />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/login" element={<Login />} />
