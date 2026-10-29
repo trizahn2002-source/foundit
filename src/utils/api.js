@@ -165,6 +165,19 @@ export async function getItems({ search, type, categoryId } = {}) {
   return items.map(toFrontendItem);
 }
 
+// One page of items for the Home page (12 per page by default)
+export async function getItemsPage({ search, type, categoryId, page = 1, perPage = 12 } = {}) {
+  const params = new URLSearchParams();
+  if (search && search.trim()) params.set("q", search.trim());
+  if (type && type !== "all") params.set("type", type);
+  if (categoryId) params.set("category", categoryId);
+  params.set("page", page);
+  params.set("per_page", perPage);
+
+  const data = await request(`/items?${params.toString()}`, {}, "Could not load items.");
+  return { items: data.items.map(toFrontendItem), pagination: data.pagination };
+}
+
 export async function getItem(id) {
   const item = await request(
     `/items/${id}`,

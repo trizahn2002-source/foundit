@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import CategoryManager from "../components/CategoryManager";
 import AccountSettings from "../components/AccountSettings";
 import { BellRing, ClipboardCheck, Package, MapPin, CalendarDays, PackageOpen, ArrowUpRight, PlusCircle } from "lucide-react";
 import {
@@ -608,7 +607,6 @@ function Dashboard() {
 
       <AccountSettings user={user} onUserChanged={setUser} />
       </div>}
-      {activeSection === "reports" && <CategoryManager />}
     </section>
   );
 }
