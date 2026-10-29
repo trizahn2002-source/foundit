@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Search, Heart, Sparkles } from "lucide-react";
 import PasswordStrength, { passwordChecklistComplete } from "../components/PasswordStrength";
 import { request } from "../utils/api";
+import { getSafeRedirect } from "../utils/redirect";
 
 const emptyForm = {
   username: "",
@@ -23,6 +24,10 @@ async function post(path, body) {
 function Login() {
   const { setUser } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const destination = getSafeRedirect(location.state?.from);
+  const loginNotice =
+    typeof location.state?.message === "string" ? location.state.message : "";
   const [isRegistering, setIsRegistering] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [message, setMessage] = useState("");
@@ -44,13 +49,13 @@ function Login() {
         throw new Error("Unexpected Google sign-in response.");
       }
       setUser(data.user);
-      navigate("/dashboard", { replace: true });
+      navigate(destination || "/dashboard", { replace: true });
     } catch (err) {
       setMessage(err.message || "Unable to sign in with Google.");
     } finally {
       setLoading(false);
     }
-  }, [navigate, setUser]);
+  }, [navigate, setUser, destination]);
 
   useEffect(() => {
     if (!googleClientId || !googleButtonRef.current) return;
@@ -133,7 +138,10 @@ function Login() {
       });
       if (data.two_factor_required) {
         setForm(emptyForm);
-        navigate("/login/verify-otp");
+        navigate(
+          "/login/verify-otp",
+          destination ? { state: { from: destination } } : undefined
+        );
         return;
       }
       setMessage("Unexpected login response. Please try again.");
@@ -245,6 +253,26 @@ function Login() {
                   : "Log in to manage your lost and found items."}
               </p>
             </div>
+            {loginNotice && !isRegistering && (
+              <div
+                role="status"
+                style={{
+                  background: "#fff1ea",
+                  border: "1px solid #f0b8a0",
+                  borderLeft: "5px solid #e07a5f",
+                  color: "#8a3a22",
+                  borderRadius: 10,
+                  padding: "0.85rem 1rem",
+                  marginBottom: "1.25rem",
+                  fontSize: "1rem",
+                  fontWeight: 700,
+                  textAlign: "left",
+                  lineHeight: 1.4,
+                }}
+              >
+                {loginNotice}
+              </div>
+            )}            
             <form className="auth-form" onSubmit={handleSubmit}>
               {isRegistering && (
                 <div className="form-group">
