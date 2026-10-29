@@ -463,10 +463,9 @@ function ItemDetails() {
         {/* LOGIN PROMPT */}
 
         {!user && reportType === "found" && (
-          <p className="item-details-login-note">
-            <Link to="/login">Log in</Link>{" "}
-            to claim this item.
-          </p>
+          <Link to="/login" className="btn item-details-claim-btn">
+            Claim This Item
+          </Link>
         )}
 
         {/* CLAIM FORM */}
@@ -800,5 +799,5 @@ function ItemDetails() {
     </section>
   );
 }
-
+//final export
 export default ItemDetails;
