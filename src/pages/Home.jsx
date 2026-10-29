@@ -5,6 +5,17 @@ import { Search, MapPin, CalendarDays, ImageOff } from "lucide-react";
 import { getItems, getCategories } from "../utils/api";
 import "./Home.css";
 
+function isReturnedItem(item) {
+  const status = String(item.status || "").toLowerCase();
+  const reportType = String(item.reportType || "").toLowerCase();
+
+  return (
+    status === "returned" ||
+    status === "resolved" ||
+    reportType === "returned"
+  );
+}
+
 function Home() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
@@ -14,30 +25,50 @@ function Home() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    getCategories().then(setCategories).catch(() => {});
+    getCategories()
+      .then(setCategories)
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
     let ignore = false;
+
     const timer = setTimeout(() => {
-      getItems({ search, type: filter, categoryId })
+      // The Returned filter needs to inspect item status,
+      // so request all report types before filtering locally.
+      const requestedType = filter === "returned" ? "all" : filter;
+
+      getItems({
+        search,
+        type: requestedType,
+        categoryId,
+      })
         .then((data) => {
           if (!ignore) {
-            setItems(data);
+            setItems(Array.isArray(data) ? data : []);
             setError("");
           }
         })
         .catch((err) => {
-          if (!ignore) setError(err.message);
+          if (!ignore) {
+            setError(err.message || "Unable to load items.");
+            setItems([]);
+          }
         });
     }, 300);
+
     return () => {
       ignore = true;
       clearTimeout(timer);
     };
   }, [search, filter, categoryId]);
 
-  const shownItems = items || [];
+  const allItems = items || [];
+
+  const shownItems =
+    filter === "returned"
+      ? allItems.filter(isReturnedItem)
+      : allItems;
 
   return (
     <div className="container home-page">
@@ -45,7 +76,12 @@ function Home() {
 
       <div className="home-controls">
         <div className="home-search">
-          <Search className="home-search-icon" size={20} strokeWidth={2} aria-hidden="true" />
+          <Search
+            className="home-search-icon"
+            size={20}
+            strokeWidth={2}
+            aria-hidden="true"
+          />
           <input
             className="input home-search-input"
             type="search"
@@ -64,16 +100,19 @@ function Home() {
         >
           <option value="">All categories</option>
           {categories.map((category) => (
-            <option key={category.id} value={category.id}>{category.name}</option>
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
           ))}
         </select>
 
         <div className="filter-buttons">
-          {["all", "lost", "found"].map((type) => (
+          {["all", "lost", "found", "returned"].map((type) => (
             <button
               key={type}
               type="button"
               className={filter === type ? "btn" : "btn btn-outline"}
+              aria-pressed={filter === type}
               onClick={() => setFilter(type)}
             >
               {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -87,44 +126,92 @@ function Home() {
       ) : items === null ? (
         <p className="empty">Loading items...</p>
       ) : shownItems.length === 0 ? (
-        <p className="empty">No items match your search.</p>
+        <p className="empty">
+          {filter === "returned"
+            ? "No returned items found."
+            : "No items match your search."}
+        </p>
       ) : (
         <div className="items-grid">
-          {shownItems.map((item) => (
-            <Link to={`/items/${item.id}`} key={item.id} className="card item-card">
-              <div className="item-card-image">
-                {item.photo ? (
-                  <img className="item-card-photo" src={item.photo} alt={item.itemName} />
-                ) : (
-                  <div className="item-card-placeholder">
-                    <ImageOff size={30} strokeWidth={1.7} aria-hidden="true" />
-                    <span>No photo available</span>
-                  </div>
-                )}
-              </div>
-              <div className="item-card-details">
-                <span className={`badge badge-${item.reportType}`}>
-                  {item.reportType}
-                </span>
-                <h3>{item.itemName}</h3>
-                <p className="item-card-meta">
-                  <MapPin size={16} strokeWidth={2} aria-hidden="true" />
-                  <span>{item.location?.name || "Location not specified"}</span>
-                </p>
-                <p className="item-card-meta">
-                  <CalendarDays size={16} strokeWidth={2} aria-hidden="true" />
-                  <span>
-                    {item.date
-                      ? new Date(`${item.date}T00:00:00`).toLocaleDateString("en-GB", {
-                          day: "numeric", month: "short", year: "numeric",
-                        })
-                      : "Date not specified"}
+          {shownItems.map((item) => {
+            const returned = isReturnedItem(item);
+
+            return (
+              <Link
+                to={`/items/${item.id}`}
+                key={item.id}
+                className="card item-card"
+              >
+                <div className="item-card-image">
+                  {item.photo ? (
+                    <img
+                      className="item-card-photo"
+                      src={item.photo}
+                      alt={item.itemName || "Reported item"}
+                    />
+                  ) : (
+                    <div className="item-card-placeholder">
+                      <ImageOff
+                        size={30}
+                        strokeWidth={1.7}
+                        aria-hidden="true"
+                      />
+                      <span>No photo available</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="item-card-details">
+                  <span
+                    className={`badge badge-${
+                      returned ? "returned" : item.reportType
+                    }`}
+                  >
+                    {returned
+                      ? "Returned"
+                      : item.reportType || "Item"}
                   </span>
-                </p>
-                <span className="item-card-category">{item.category}</span>
-              </div>
-            </Link>
-          ))}
+
+                  <h3>{item.itemName}</h3>
+
+                  <p className="item-card-meta">
+                    <MapPin
+                      size={16}
+                      strokeWidth={2}
+                      aria-hidden="true"
+                    />
+                    <span>
+                      {item.location?.name || "Location not specified"}
+                    </span>
+                  </p>
+
+                  <p className="item-card-meta">
+                    <CalendarDays
+                      size={16}
+                      strokeWidth={2}
+                      aria-hidden="true"
+                    />
+                    <span>
+                      {item.date
+                        ? new Date(`${item.date}T00:00:00`).toLocaleDateString(
+                            "en-GB",
+                            {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            }
+                          )
+                        : "Date not specified"}
+                    </span>
+                  </p>
+
+                  <span className="item-card-category">
+                    {item.category}
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>
