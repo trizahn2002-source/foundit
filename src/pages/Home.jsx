@@ -50,6 +50,7 @@ function Home() {
         type: requestedType,
         categoryId,
         page,
+        status: filter === "returned" ? "resolved" : undefined,
       })
         .then((data) => {
           if (!ignore) {
