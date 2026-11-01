@@ -171,8 +171,8 @@ export async function getItemsPage({ search, type, categoryId, status, page = 1,
   const params = new URLSearchParams();
   if (search && search.trim()) params.set("q", search.trim());
   if (type && type !== "all") params.set("type", type);
-  if (status) params.set("status", status);
   if (categoryId) params.set("category", categoryId);
+  if (status) params.set("status", status);
   params.set("page", page);
   params.set("per_page", perPage);
 

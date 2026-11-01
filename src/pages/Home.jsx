@@ -68,6 +68,7 @@ function Home() {
         status: isReturnedTab ? "resolved" : undefined,
         categoryId,
         page,
+        status: filter === "returned" ? "resolved" : undefined,
       })
         .then((data) => {
           if (!ignore) {
