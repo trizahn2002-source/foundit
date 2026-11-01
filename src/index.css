@@ -1791,3 +1791,12 @@ button, input, select, textarea { font: inherit; }
 .foundit-settings-message { margin: 1rem 0 0; color: #3d405b; font-weight: 700; }
 @media(max-width:600px) { .foundit-settings-intro { padding: 1rem; } .foundit-settings-trigger { padding: 1rem; gap: .75rem; } .foundit-settings-body { padding: 1rem; } .foundit-settings-icon { width: 40px; height: 40px; } }
 @media(prefers-reduced-motion:reduce) { .foundit-settings-section, .foundit-settings-chevron { transition: none; } }
+
+/* =========================================
+   READABILITY (Batch 1) - darker muted text
+   ========================================= */
+:root { --color-muted: #6b6f80; }
+
+.dashboard-page .dashboard-view-tools,
+.dashboard-page .dashboard-action-content p,
+.dashboard-page .dashboard-action-empty p { color: #6b6f80; }

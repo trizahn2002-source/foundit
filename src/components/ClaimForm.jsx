@@ -1,14 +1,45 @@
-import { ArrowRight, CheckCircle2, Info, ShieldCheck, X } from "lucide-react";
-import { useState } from "react";
+import {
+  ArrowRight,
+  CheckCircle2,
+  ImageOff,
+  Info,
+  MapPin,
+  ShieldCheck,
+  X,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import "./ClaimForm.css";
 import { request } from "../utils/api";
 
 
-function ClaimForm({ itemId, onClaimed }) {
+function ClaimForm({
+  itemId,
+  itemName,
+  itemPhoto,
+  itemLocation,
+  openRequest = 0,
+  onClaimed,
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const textareaRef = useRef(null);
+
+  // Open the form when the main "Claim this item" button on the page is pressed.
+  useEffect(() => {
+    if (openRequest > 0) {
+      setError("");
+      setIsOpen(true);
+    }
+  }, [openRequest]);
+
+  // Put the cursor in the box as soon as the form opens.
+  useEffect(() => {
+    if (isOpen) {
+      textareaRef.current?.focus({ preventScroll: true });
+    }
+  }, [isOpen]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -90,6 +121,37 @@ function ClaimForm({ itemId, onClaimed }) {
         </div>
       </div>
 
+      {itemName && (
+        <div className="claim-item-summary">
+          {itemPhoto ? (
+            <img
+              className="claim-item-summary-photo"
+              src={itemPhoto}
+              alt=""
+            />
+          ) : (
+            <div
+              className="claim-item-summary-photo claim-item-summary-photo--empty"
+              aria-hidden="true"
+            >
+              <ImageOff size={22} />
+            </div>
+          )}
+
+          <div className="claim-item-summary-text">
+            <span>You're claiming</span>
+            <strong>{itemName}</strong>
+
+            {itemLocation && itemLocation !== "Not specified" && (
+              <small>
+                <MapPin size={14} aria-hidden="true" />
+                {itemLocation}
+              </small>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="claim-privacy-note">
         <Info size={19} strokeWidth={1.8} />
         <p>
@@ -101,13 +163,19 @@ function ClaimForm({ itemId, onClaimed }) {
       <form className="claim-form" onSubmit={handleSubmit}>
         <div className="claim-field">
           <label htmlFor="verification">What helps prove this item is yours?</label>
+          <p className="claim-field-examples" id="verification-examples">
+            Good details: a scratch or sticker, what's inside, initials or an
+            engraving, a lock-screen or wallpaper, or where exactly you lost it.
+          </p>
           <textarea
+            ref={textareaRef}
+            aria-describedby="verification-examples"
             id="verification"
             name="verification"
             rows={4}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="For example, describe a unique mark, accessory or detail not mentioned in the report."
+            placeholder="e.g. A small scratch on the handle, and my initials are written inside the strap."
             required
             disabled={submitting}
           />

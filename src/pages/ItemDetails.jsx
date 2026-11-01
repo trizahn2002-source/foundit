@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, Link, useLocation, useNavigate} from "react-router-dom";
 import TipFinder from "../components/TipFinder";
@@ -19,6 +18,7 @@ import {
   Info,
   PackageCheck,
   X,
+  ArrowRight,
 } from "lucide-react";
 
 import { useAuth } from "../context/AuthContext";
@@ -27,6 +27,59 @@ import PossibleMatches from "../components/PossibleMatches";
 import { getItem, request } from "../utils/api";
 import "./ItemDetails.css";
 
+
+// -----------------------------------------
+// HELPERS
+// -----------------------------------------
+
+// "2026-10-25" -> "25 Oct 2026". Falls back to the original text.
+function formatDate(value) {
+  if (!value) return "";
+
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(value));
+  const date = match
+    ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+    : new Date(value);
+
+  if (Number.isNaN(date.getTime())) return String(value);
+
+  return date.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+// The message people see when they share an item (public details only).
+function buildShareText(item) {
+  const reportType = (item.reportType ?? item.type ?? "").toLowerCase();
+  const title = item.itemName ?? item.title ?? "Item";
+
+  const description = (item.description ?? "").trim();
+  const shortDescription =
+    description.length > 120
+      ? `${description.slice(0, 117)}...`
+      : description;
+
+  const location =
+    typeof item.location === "string"
+      ? item.location
+      : item.location?.name || "";
+
+  const when = formatDate(item.date);
+
+  return [
+    `${reportType === "found" ? "FOUND" : "LOST"}: ${title}`,
+    shortDescription,
+    location ? `Where: ${location}` : "",
+    when ? `When: ${when}` : "",
+    reportType === "found"
+      ? "Is this yours? Claim it on FoundIt:"
+      : "Have you seen it? Let the owner know on FoundIt:",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
 
 function ItemDetails() {
   const { id } = useParams();
@@ -45,6 +98,9 @@ function ItemDetails() {
 
   const [shareMessage, setShareMessage] = useState("");
 
+  // Increases each time the main "Claim this item" button is pressed.
+  const [claimOpenRequest, setClaimOpenRequest] = useState(0);
+
   // Contact sharing during claim approval
   const [approvingClaimId, setApprovingClaimId] = useState(null);
   const [contactMethod, setContactMethod] = useState("whatsapp");
@@ -62,6 +118,7 @@ function ItemDetails() {
     setShareMessage("");
     setApprovingClaimId(null);
     setClaimError("");
+    setClaimOpenRequest(0);
 
     getItem(id)
       .then((loadedItem) => {
@@ -193,30 +250,13 @@ function ItemDetails() {
 
     setShareMessage("");
 
-    const reportType = (
-      item.reportType ?? item.type ?? ""
-    ).toLowerCase();
+    const title = item.itemName ?? item.title ?? "Item";
+    const text = buildShareText(item);
 
-    const title =
-      item.itemName ?? item.title ?? "Item";
+    // Share the item's own page without any #claims / query parts.
+    const url = window.location.origin + window.location.pathname;
 
-    const location =
-      typeof item.location === "string"
-        ? item.location
-        : item.location?.name || "Location not specified";
-
-    const url = window.location.href;
-
-    const intro =
-      reportType === "found"
-        ? "Does this belong to someone you know?"
-        : "Have you seen this item?";
-
-    const text =
-      `${intro}\n${title}\n` +
-      `Location: ${location}\n` +
-      "View this report on FoundIt.";
-
+    // Phones: opens the share sheet (WhatsApp, SMS, ...).
     if (navigator.share) {
       try {
         await navigator.share({
@@ -231,15 +271,45 @@ function ItemDetails() {
       }
     }
 
+    // Computers: copy the whole message, link included.
+    const fullMessage = `${text}\n${url}`;
+
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(fullMessage);
 
       setShareMessage(
-        "Link copied! You can now share it."
+        "Message copied! Paste it into WhatsApp, SMS or social media."
       );
     } catch {
-      window.prompt("Copy this item link:", url);
+      window.prompt("Copy this message to share the item:", fullMessage);
     }
+  }
+
+  // -----------------------------------------
+  // CLAIM BUTTON HELPERS
+  // -----------------------------------------
+
+  function scrollToClaims() {
+    const reduceMotion =
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+    document.getElementById("claims")?.scrollIntoView({
+      behavior: reduceMotion ? "auto" : "smooth",
+      block: "start",
+    });
+  }
+
+  function goToLoginToClaim() {
+    navigate("/login", {
+      state: {
+        from: {
+          pathname: routerLocation.pathname,
+          search: routerLocation.search,
+          hash: "#claims",
+        },
+        message: "Please log in to claim this item.",
+      },
+    });
   }
 
   // -----------------------------------------
@@ -312,6 +382,40 @@ function ItemDetails() {
         : item.status === "resolved"
           ? "Returned"
           : item.status;
+
+  // The one main action for this visitor, shown next to the item details.
+  const pendingClaims = (claims ?? []).filter((c) => c.status === "pending");
+  let primaryAction = null;
+
+  // Visitors who can still claim (or must log in first) use the claim
+  // section below the card, so no second "Claim" button is shown here.
+  if (myClaim) {
+    primaryAction = (
+      <button
+        type="button"
+        className="item-details-cta item-details-cta--soft"
+        onClick={scrollToClaims}
+      >
+        <ShieldCheck size={19} />
+        <span>View your claim</span>
+      </button>
+    );
+  } else if (isOwner && pendingClaims.length > 0) {
+    primaryAction = (
+      <button
+        type="button"
+        className="item-details-cta"
+        onClick={scrollToClaims}
+      >
+        <span>
+          Review {pendingClaims.length === 1
+            ? "1 claim"
+            : `${pendingClaims.length} claims`}
+        </span>
+        <ArrowRight size={19} />
+      </button>
+    );
+  }
 
   // -----------------------------------------
   // PAGE
@@ -403,7 +507,7 @@ function ItemDetails() {
                 <span>Date</span>
               </dt>
 
-              <dd>{item.date || "Not specified"}</dd>
+              <dd>{formatDate(item.date) || "Not specified"}</dd>
             </div>
 
             <div className="item-details-meta-row">
@@ -421,14 +525,18 @@ function ItemDetails() {
 
           <div className="item-details-share-area">
 
-            <button
-              type="button"
-              className="item-details-share"
-              onClick={handleShare}
-            >
-              <Share2 size={19} />
-              <span>Share this item</span>
-            </button>
+            <div className="item-details-actions">
+              {primaryAction}
+
+              <button
+                type="button"
+                className="item-details-share"
+                onClick={handleShare}
+              >
+                <Share2 size={19} />
+                <span>Share this item</span>
+              </button>
+            </div>
 
             <p className="item-details-share-hint">
               Help this item reach its owner.
@@ -475,18 +583,7 @@ function ItemDetails() {
             <button
               type="button"
               className="btn"
-              onClick={() =>
-                navigate("/login", {
-                  state: {
-                    from: {
-                      pathname: routerLocation.pathname,
-                      search: routerLocation.search,
-                      hash: "#claims",
-                    },
-                    message: "Please log in to claim this item.",
-                  },
-                })
-              }
+              onClick={goToLoginToClaim}
             >
               Please log in to claim this item
             </button>
@@ -497,6 +594,10 @@ function ItemDetails() {
         {canClaim && (
           <ClaimForm
             itemId={item.id}
+            itemName={itemName}
+            itemPhoto={itemPhoto}
+            itemLocation={itemLocation}
+            openRequest={claimOpenRequest}
             onClaimed={loadClaims}
           />
         )}
