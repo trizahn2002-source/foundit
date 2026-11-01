@@ -1,30 +1,28 @@
 # FoundIt - Lost & Found App
 
 ## Description
-FoundIt is a Single Page Application (SPA) built with React that helps people report, search for and recover lost items.
+FoundIt is a full-stack web application that helps people report, search for and recover lost items. The frontend is built with React and the backend with Flask and PostgreSQL.
 
 The application provides a central platform for lost and found reports instead of relying on scattered WhatsApp groups, social media posts, word of mouth or physical lost-and-found offices.
 
 FoundIt also helps users identify possible matches between lost and found reports by comparing details such as item category, date, location and description. Users can view possible matching items and submit private ownership verification details when claiming a found item.
 
-Phase 1 is frontend-only and uses mock data.
+This repository contains the React frontend. It connects to the [FoundIt backend](https://github.com/trizahn2002-source/foundit-backend), a separate repository that stores users, reports and claims.
 
 ## Screenshot
 <img src="src/assets/screenshot.png" alt="FoundIt App" width="800"/> 
 
 ## Features
-- Browse reported lost and found items
-- Search and filter item reports
-- Report a lost or found item
-- View full item details on a dedicated details page
-- Find possible matches for active lost items
-- Rank stronger possible matches first
-- View possible matching found items
-- Submit a claim for an active found item
-- Provide private ownership verification details when making a claim
-- Display confirmation after a claim is submitted
-- Display an empty state when no possible matches are found
-- Navigate between pages without reloading the application
+- Register and log in with email verification or Google sign-in, with password recovery and account settings
+- Browse, search and filter lost, found and returned items
+- Report a lost or found item with a photo, date and location (Geoapify address search)
+- View full item details on a dedicated page, with a map link and a share button
+- Find and rank possible matches for active lost items
+- Submit a claim with private ownership verification details
+- Finders approve or reject claims from their dashboard and mark items as handed over
+- Email notifications when a claim is received, approved or rejected
+- Optional tip for the finder, shown as a sandbox demo (no real payments)
+- Personal dashboard and a responsive layout for phones and desktops
 
 ## How Possible Matching Works
 FoundIt uses rule-based matching to identify possible matches between lost and found reports.
@@ -44,10 +42,14 @@ A possible match does not automatically confirm that two reports refer to the sa
 | Route | Page |
 |---|---|
 | `/` | Home - browse, search and filter items |
-| `/report` | Report a lost or found item |
-| `/items/:id` | View item details, possible matches or claim an item |
-| `/dashboard` | User dashboard |
+| `/report` | Report a lost or found item (login required) |
+| `/items/:id` | View item details, share the item, see possible matches, claim an item or review claims |
+| `/dashboard` | User dashboard - reports, claims, claim requests and account settings |
 | `/login` | Login / register |
+| `/login/verify-otp` | Enter the one-time code to finish logging in |
+| `/verify-email` | Confirm your email address after registering |
+| `/forgot-password` | Request a password reset email |
+| `/reset-password` | Set a new password from the reset link |
 | `*` | Not Found page |
 
 ## How to Run the Project
@@ -78,13 +80,33 @@ cp .env.example .env
 
 5. Add your Geoapify API key to the `.env` file.
 
-6. Start the development server:
+6. Set up and start the backend. FoundIt needs its backend running, otherwise the frontend shows a "database couldn't be reached" error. Clone the FoundIt backend repository (a separate repository), go into its folder and install its dependencies:
+
+```bash
+git clone git@github.com:trizahn2002-source/foundit-backend.git
+cd foundit-backend
+pipenv install
+```
+
+7. Start PostgreSQL:
+
+```bash
+sudo service postgresql start
+```
+
+8. In a separate terminal, run the backend from its folder:
+
+```bash
+pipenv run python app.py
+```
+
+9. Back in the frontend terminal, start the development server:
 
 ```bash
 npm run dev
 ```
 
-7. Open the local URL displayed in the terminal.
+10. Open the local URL displayed in the terminal.
 
 ## Technologies Used
 - React
@@ -93,6 +115,9 @@ npm run dev
 - JavaScript
 - CSS3
 - Geoapify Geocoding API
+- Flask and PostgreSQL backend (separate repository)
+- Gmail API (verification and claim emails, sent by the backend)
+- Vercel (frontend hosting)
 - Git and GitHub
 
 ## API Used
@@ -101,20 +126,17 @@ FoundIt uses the Geoapify Geocoding API for location functionality when reportin
 The API key should be stored in the `.env` file and should not be committed to GitHub.
 
 ## Future Implementations
-- Connect the application to a backend and database
-- Add full user authentication
-- Store reports and submitted claims permanently
-- Allow finders to review and approve ownership claims
+- Replace the sandbox M-Pesa tipping demo with live payments
 - Notify users when new possible matches are found
-- Add image upload and storage
+- Add a hamburger menu for the mobile navbar if more links are added
 - Improve the matching system as more reports are added
 
 ## Collaborators
 - [Trizah Njeri](https://github.com/trizahn2002-source) — Scrum Master, Home Page, Search and Filtering
 - [Abigail Tandiwe](https://github.com/tandisimelane-15) — Possible Matches and Claim Item
-- [Samuel Mwaura](GitHub-link) — Report Item Form and Geoapify API
+- [Samuel Mwaura](https://github.com/kimz-art) — Report Item Form and Geoapify API
 - [Regan Njeru](https://github.com/toshregan94-hub) — Item Details
-- [Wesley Were](GitHub-link) — Login, Registration and Dashboard
+- [Wesley Were](https://github.com/WesleyWanga) — Login, Registration and Dashboard
 
 ## How to Contribute
 1. Create a feature branch for your task
