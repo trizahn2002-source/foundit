@@ -257,7 +257,8 @@ function ItemDetails() {
     const url = window.location.origin + window.location.pathname;
 
     // Phones: opens the share sheet (WhatsApp, SMS, ...).
-    if (navigator.share) {
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (navigator.share && isMobile) {
       try {
         await navigator.share({
           title: `FoundIt - ${title}`,
