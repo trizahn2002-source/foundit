@@ -1811,3 +1811,59 @@ button, input, select, textarea { font: inherit; }
 @media (max-width: 360px) {
   .home-controls .filter-buttons .btn { font-size: 0.8rem; padding-left: 0.1rem; padding-right: 0.1rem; }
 }
+
+
+/* ---------- Navbar on phones ---------- */
+@media (max-width: 640px) {
+  body .navbar { padding: 0.6rem 1rem; gap: 0.35rem; }
+
+  .navbar .nav-links {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    row-gap: 0.35rem;
+    gap: 0.15rem;
+  }
+
+  .navbar .nav-links a:not(.logo):not(.btn) {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.88rem;
+    white-space: nowrap;
+  }
+
+  .navbar .nav-links .btn {
+    padding: 0.45rem 0.8rem;
+    font-size: 0.86rem;
+    min-height: 38px;
+    white-space: nowrap;
+  }
+
+  body .navbar .nav-avatar-button { padding: 2px 4px 2px 2px; gap: 3px; min-height: 0; border-color: transparent; }
+}
+
+/* ---------- Navbar on phones ---------- */
+@media (max-width: 640px) {
+  body .navbar { padding: 0.6rem 1rem; gap: 0.35rem; }
+
+  .navbar .nav-links {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    row-gap: 0.35rem;
+    gap: 0.15rem;
+  }
+
+  .navbar .nav-links a:not(.nav-cta) {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.88rem;
+    white-space: nowrap;
+  }
+
+  .navbar .nav-links a.nav-cta {
+    padding: 0.5rem 0.9rem;
+    font-size: 0.86rem;
+    white-space: nowrap;
+  }
+
+  body .navbar .nav-avatar-button { padding: 2px 4px 2px 2px; gap: 3px; min-height: 0; border-color: transparent; }
+}
