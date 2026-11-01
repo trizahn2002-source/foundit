@@ -1,5 +1,5 @@
 import Hero from "../components/Hero";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Search, MapPin, CalendarDays, ImageOff } from "lucide-react";
 import { getItemsPage, getCategories } from "../utils/api";
@@ -25,11 +25,28 @@ function Home() {
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState(null);
+  const [reloadKey, setReloadKey] = useState(0);
+  const [slowLoad, setSlowLoad] = useState(false);
+  const previousPage = useRef(page);
 
   // Go back to page 1 whenever the search or filters change
   useEffect(() => {
     setPage(1);
   }, [search, filter, categoryId]);
+
+  // After pressing Next / Previous, bring the top of the list back into view
+  useEffect(() => {
+    if (previousPage.current === page) return;
+    previousPage.current = page;
+
+    const reduceMotion =
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+    document.querySelector(".home-controls")?.scrollIntoView({
+      behavior: reduceMotion ? "auto" : "smooth",
+      block: "start",
+    });
+  }, [page]);
 
   useEffect(() => {
     getCategories()
@@ -41,13 +58,14 @@ function Home() {
     let ignore = false;
 
     const timer = setTimeout(() => {
-      // Request all report types when showing returned items.
-      // Keep pagination from the latest main branch.
-      const requestedType = filter === "returned" ? "all" : filter;
+      // "Returned" items are the ones with status "resolved". The server
+      // filters them, so every page and page count is correct.
+      const isReturnedTab = filter === "returned";
 
       getItemsPage({
         search,
-        type: requestedType,
+        type: isReturnedTab ? "all" : filter,
+        status: isReturnedTab ? "resolved" : undefined,
         categoryId,
         page,
         status: filter === "returned" ? "resolved" : undefined,
@@ -56,11 +74,7 @@ function Home() {
           if (!ignore) {
             const pageItems = Array.isArray(data.items) ? data.items : [];
 
-            setItems(
-              filter === "returned"
-                ? pageItems.filter(isReturnedItem)
-                : pageItems
-            );
+            setItems(pageItems);
 
             setPagination(data.pagination);
             setError("");
@@ -78,14 +92,37 @@ function Home() {
       ignore = true;
       clearTimeout(timer);
     };
-  }, [search, filter, categoryId, page]);
+  }, [search, filter, categoryId, page, reloadKey]);
+
+  // If the first load is slow (for example the server is waking up), say so.
+  useEffect(() => {
+    if (items !== null || error) {
+      setSlowLoad(false);
+      return;
+    }
+
+    const timer = setTimeout(() => setSlowLoad(true), 4000);
+    return () => clearTimeout(timer);
+  }, [items, error]);
 
   const allItems = items || [];
 
-  const shownItems =
-    filter === "returned"
-      ? allItems.filter(isReturnedItem)
-      : allItems;
+  const shownItems = allItems;
+
+  const hasActiveFilters =
+    Boolean(search.trim()) || Boolean(categoryId) || filter !== "all";
+
+  function clearFilters() {
+    setSearch("");
+    setCategoryId("");
+    setFilter("all");
+  }
+
+  function retryLoading() {
+    setError("");
+    setItems(null);
+    setReloadKey((k) => k + 1);
+  }
 
   return (
     <div className="container home-page">
@@ -139,15 +176,62 @@ function Home() {
       </div>
 
       {error ? (
-        <p className="empty">{error}</p>
+        <div className="empty home-empty" role="alert">
+          <p>{error}</p>
+          <button type="button" className="btn" onClick={retryLoading}>
+            Try again
+          </button>
+        </div>
       ) : items === null ? (
-        <p className="empty">Loading items...</p>
+        <div aria-busy="true">
+          <p className="empty home-loading" role="status">
+            {slowLoad
+              ? "Still loading... the server can take a few seconds to wake up."
+              : "Loading items..."}
+          </p>
+
+          <div className="items-grid" aria-hidden="true">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="card item-card item-card-skeleton">
+                <div className="item-card-image" />
+                <div className="skeleton-line skeleton-line--badge" />
+                <div className="skeleton-line" />
+                <div className="skeleton-line skeleton-line--short" />
+              </div>
+            ))}
+          </div>
+        </div>
       ) : shownItems.length === 0 ? (
-        <p className="empty">
-          {filter === "returned"
-            ? "No returned items found."
-            : "No items match your search."}
-        </p>
+        <div className="empty home-empty">
+          <h3>
+            {filter === "returned"
+              ? "No returned items found."
+              : hasActiveFilters
+                ? "No items match your search."
+                : "No reports yet."}
+          </h3>
+
+          <p>
+            {hasActiveFilters
+              ? "Try a different word, or clear the filters."
+              : "Be the first to post one."}
+          </p>
+
+          <div className="home-empty-actions">
+            {hasActiveFilters && (
+              <button type="button" className="btn" onClick={clearFilters}>
+                Clear filters
+              </button>
+            )}
+
+            <Link to="/report?type=lost" className="btn btn-outline">
+              I lost something
+            </Link>
+            <Link to="/report?type=found" className="btn btn-outline">
+              I found something
+            </Link>
+          </div>
+        </div>
       ) : (
         <div className="items-grid">
           {shownItems.map((item) => {
@@ -179,7 +263,8 @@ function Home() {
                 </div>
 
                 <div className="item-card-details">
-                  <span
+                  <div className="item-card-badges">
+                    <span
                     className={`badge badge-${
                       returned ? "returned" : item.reportType
                     }`}
@@ -188,6 +273,13 @@ function Home() {
                       ? "Returned"
                       : item.reportType || "Item"}
                   </span>
+
+                    {!returned && item.status === "claimed" && (
+                      <span className="badge badge-claimed">
+                        Claim in progress
+                      </span>
+                    )}
+                  </div>
 
                   <h3>{item.itemName}</h3>
 
@@ -232,15 +324,29 @@ function Home() {
         </div>
       )}
     {pagination && pagination.pages > 1 && (
-        <div style={{ display: "flex", gap: "1rem", justifyContent: "center", alignItems: "center", margin: "2rem 0" }}>
-          <button className="btn" disabled={!pagination.has_prev} onClick={() => setPage(page - 1)}>
+        <nav className="home-pagination" aria-label="Pagination">
+          <button
+            type="button"
+            className="btn"
+            disabled={!pagination.has_prev}
+            onClick={() => setPage(page - 1)}
+          >
             ← Previous
           </button>
-          <span>Page {pagination.page} of {pagination.pages}</span>
-          <button className="btn" disabled={!pagination.has_next} onClick={() => setPage(page + 1)}>
+
+          <span aria-live="polite">
+            Page {pagination.page} of {pagination.pages}
+          </span>
+
+          <button
+            type="button"
+            className="btn"
+            disabled={!pagination.has_next}
+            onClick={() => setPage(page + 1)}
+          >
             Next →
           </button>
-        </div>
+        </nav>
       )}
     </div>
   );

@@ -166,6 +166,7 @@ export async function getItems({ search, type, categoryId } = {}) {
 }
 
 // One page of items for the Home page (12 per page by default)
+// Optional status: "active" | "claimed" | "resolved" (resolved = Returned on the Home page)
 export async function getItemsPage({ search, type, categoryId, status, page = 1, perPage = 12 } = {}) {
   const params = new URLSearchParams();
   if (search && search.trim()) params.set("q", search.trim());

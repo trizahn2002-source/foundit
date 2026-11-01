@@ -1,10 +1,12 @@
-
 import { useEffect, useRef, useState } from "react";
-import { CheckCircle2, Clock3, XCircle } from "lucide-react";
+import { CheckCircle2, Clock3, Heart, XCircle } from "lucide-react";
 import { sendTip, getTipStatus } from "../utils/api";
 
 const POLL_INTERVAL = 5000;
 const MAX_CHECKS = 12;
+
+// M-Pesa currently runs in the Safaricom sandbox. Set to false when it goes live.
+const SANDBOX_MODE = true;
 
 function TipFinder({ itemId }) {
   const [open, setOpen] = useState(false);
@@ -121,10 +123,11 @@ function TipFinder({ itemId }) {
     return (
       <button
         type="button"
-        className="btn"
+        className="btn tip-open-btn"
         onClick={() => setOpen(true)}
       >
-        💚 Tip the finder
+        <Heart size={18} aria-hidden="true" />
+        <span>Tip the finder</span>
       </button>
     );
   }
@@ -155,6 +158,13 @@ function TipFinder({ itemId }) {
           style={{ display: "grid", gap: "0.75rem", maxWidth: 360 }}
         >
           <h3>Say thank you with an M-Pesa tip</h3>
+
+          {SANDBOX_MODE && (
+            <p className="tip-sandbox-note">
+              Test mode: tips run in the M-Pesa sandbox, so no real money is
+              sent.
+            </p>
+          )}
 
           <label>
             Amount (KSh)
@@ -207,10 +217,15 @@ function TipFinder({ itemId }) {
           )}
 
           {status !== "failed" && status !== "waiting" && message && (
-            <p role="status">{message}</p>
+            <p role={status === "error" ? "alert" : "status"}>{message}</p>
           )}
 
-          <button type="button" onClick={closeForm} disabled={submitting}>
+          <button
+            type="button"
+            className="btn btn-outline"
+            onClick={closeForm}
+            disabled={submitting}
+          >
             Close
           </button>
         </form>

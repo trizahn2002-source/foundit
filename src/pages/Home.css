@@ -259,3 +259,134 @@ body {
 .home-page .item-card-placeholder svg {
   color: #e07a5f;
 }
+
+
+/* =========================================
+   HOME POLISH (Batch 2) - appended overrides
+   ========================================= */
+
+/* Scrolling back to the filters should not hide them under the navbar */
+.home-controls { scroll-margin-top: 90px; }
+
+/* Phone: keep all four filter buttons on screen */
+.filter-buttons { flex-wrap: wrap; }
+
+@media (max-width: 480px) {
+  .home-controls .filter-buttons { width: 100%; }
+
+  .filter-buttons .btn {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0.6rem 0.25rem;
+    font-size: 0.88rem;
+    text-align: center;
+  }
+}
+
+/* Long names and locations used to be cut off at the card edge */
+.home-page .item-card h3 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.home-page .item-card-meta { align-items: flex-start; }
+.home-page .item-card-meta svg { margin-top: 0.2rem; }
+
+.home-page .item-card-meta span {
+  flex-shrink: 1;
+  min-width: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+/* Status badges on cards */
+.item-card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.item-card .badge-returned {
+  background: #e5f4eb;
+  color: #2d6f52;
+}
+
+.item-card .badge-claimed {
+  background: #fff3cd;
+  color: #7a5a12;
+  text-transform: none;
+}
+
+/* Pagination */
+.home-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 2rem 0;
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.home-pagination .btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Empty and error states */
+.home-empty { padding: 2.5rem 1rem; }
+
+.home-empty h3 {
+  margin: 0 0 0.4rem;
+  color: var(--color-text);
+  font-size: 1.25rem;
+}
+
+.home-empty p { margin: 0 0 1.25rem; }
+
+.home-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+/* Loading skeleton */
+.home-loading { margin: 0 0 1rem; }
+.item-card-skeleton { pointer-events: none; }
+
+.item-card-skeleton .item-card-image,
+.skeleton-line {
+  background: linear-gradient(90deg, #f6ebe3 25%, #fbf3ed 50%, #f6ebe3 75%);
+  background-size: 200% 100%;
+  animation: foundit-shimmer 1.3s ease-in-out infinite;
+}
+
+.skeleton-line {
+  height: 14px;
+  margin-top: 0.55rem;
+  border-radius: 999px;
+}
+
+.skeleton-line--badge { width: 64px; height: 22px; }
+.skeleton-line--short { width: 55%; }
+
+@keyframes foundit-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .item-card-skeleton .item-card-image,
+  .skeleton-line { animation: none; }
+}

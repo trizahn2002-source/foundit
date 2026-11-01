@@ -1,4 +1,3 @@
-
 /* =========================================
    FOUNDIT — CLAIM FORM
    ========================================= */
@@ -242,4 +241,76 @@
   border: none;
   background: transparent;
   box-shadow: none;
+}
+
+
+/* =========================================
+   UI POLISH (Batch 1) - appended overrides
+   ========================================= */
+
+/* Darker small text */
+.claim-section .claim-prompt-copy p,
+.claim-section .claim-header-copy p { color: #666a7c; }
+.claim-section .claim-field-hint { color: #6b6f80; }
+.claim-section .claim-field textarea::placeholder { color: #7c8092; }
+
+/* Which item am I claiming? */
+.claim-section .claim-item-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: 1.25rem;
+  padding: 0.8rem;
+  border: 1px solid #f1e5dc;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.claim-section .claim-item-summary-photo {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: 11px;
+}
+
+.claim-section .claim-item-summary-photo--empty {
+  display: grid;
+  place-items: center;
+  color: #b9a79f;
+  background: #fff0e7;
+}
+
+.claim-section .claim-item-summary-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.claim-section .claim-item-summary-text span {
+  color: #6b6f80;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.claim-section .claim-item-summary-text strong {
+  color: #3d405b;
+  font-size: 1.02rem;
+  overflow-wrap: anywhere;
+}
+
+.claim-section .claim-item-summary-text small {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #6b6f80;
+  font-size: 0.82rem;
+}
+
+.claim-section .claim-field-examples {
+  margin: 0;
+  color: #626779;
+  font-size: 0.85rem;
+  line-height: 1.6;
 }
