@@ -125,7 +125,7 @@ function Home() {
   }
 
   return (
-    <div className="container home-page">
+    <div className="home-page">
       <Hero />
 
       <div className="home-controls">

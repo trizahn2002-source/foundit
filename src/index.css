@@ -1800,3 +1800,14 @@ button, input, select, textarea { font: inherit; }
 .dashboard-page .dashboard-view-tools,
 .dashboard-page .dashboard-action-content p,
 .dashboard-page .dashboard-action-empty p { color: #6b6f80; }
+
+
+/* ---------- Mobile page padding ---------- */
+@media (max-width: 640px) {
+  body .container { padding: 1rem; }
+}
+
+/* Very small phones: let all four filter buttons fit */
+@media (max-width: 360px) {
+  .home-controls .filter-buttons .btn { font-size: 0.8rem; padding-left: 0.1rem; padding-right: 0.1rem; }
+}
